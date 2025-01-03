@@ -8,7 +8,8 @@ import {
   updateDoc,
   deleteDoc,
 } from 'firebase/firestore'
-import { db } from '../../services/firebase'
+import { db, signUpUser, signUpAuth, updateUser, getAllDocuments } from '../../services/firebase'
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 function UserManagement() {
   const [users, setUsers] = useState([])
@@ -36,29 +37,32 @@ function UserManagement() {
   const branches = ['Branch 1', 'Branch 2'] // 브랜치 목록
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const allUsers = []
-      for (const branch of branches) {
-        const usersCollection = await getDocs(
-          collection(db, 'branches', branch, 'users')
-        )
-        const branchUsers = usersCollection.docs
-          .map((doc) => ({
-            ...doc.data(),
-            id: doc.id,
-            branch: branch, // 각 유저에 브랜치 정보 추가
-          }))
-          .filter((user) => user.role !== 'admin') // Admin 제외
-        allUsers.push(...branchUsers)
-      }
-      // roleOrder에 따라 정렬
-      const sortedUsers = allUsers.sort(
-        (a, b) => (roleOrder[a.role] || 4) - (roleOrder[b.role] || 4)
-      )
-      setUsers(sortedUsers)
-    }
+    console.log('userEffect excuted')
     fetchUsers()
   }, [])
+
+  const fetchUsers = async () => {
+    const allUsers = []
+    // const allUsers = getAllDocuments()
+    for (const branch of branches) {
+      const usersCollection = await getDocs(
+        collection(db, 'branches', branch, 'users')
+      )
+      const branchUsers = usersCollection.docs
+        .map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+          // branch: branch, // 각 유저에 브랜치 정보 추가
+        }))
+        .filter((user) => user.role !== 'admin') // Admin 제외
+      allUsers.push(...branchUsers)
+    }
+    // roleOrder에 따라 정렬
+    const sortedUsers = allUsers.sort(
+      (a, b) => (roleOrder[a.role] || 4) - (roleOrder[b.role] || 4)
+    )
+    setUsers(sortedUsers)
+  }
 
   const roleOrder = {
     hall: 1,
@@ -86,36 +90,36 @@ function UserManagement() {
       userData.hourlyRate = hourlyRate
     }
 
-    const userRef = doc(db, 'branches', branch, 'users', selectedUser || '')
-
-    if (selectedUser) {
-      const docSnapshot = await getDoc(userRef)
-
-      if (docSnapshot.exists()) {
-        // 문서가 존재하면 업데이트
-        await updateDoc(userRef, userData)
+    try {
+      if (selectedUser) {
+        await updateUser(selectedUser, branch, userData)
+        setSelectedUser({ ...userData, id: selectedUser });
       } else {
-        // 문서가 없으면 새로 생성
-        await setDoc(userRef, userData, { merge: true })
+        const email = name.toLowerCase() + '@fakeemail.com'; // 이메일 생성
+        const newUser = await signUpAuth(email, password)
+        await signUpUser(branch, userData, newUser.uid)
+        console.log('New user created successfully!');
       }
-    } else {
-      // 새로운 사용자 생성
-      const newUserRef = doc(collection(db, 'branches', branch, 'users'))
-      await setDoc(newUserRef, userData)
-    }
 
-    setName('')
-    setPassword('')
-    setRole('hall')
-    setBranch('Branch 1') // 지점 기본값 초기화
-    setStartTime('09:00')
-    setEndTime('18:00')
-    setNominalSalary('')
-    setActualSalary('')
-    setWorkingDays(6)
-    setHourlyRate('')
-    setSelectedUser(null)
+      await fetchUsers();
+
+      // 상태 초기화
+      setName('');
+      setPassword('');
+      setRole('hall');
+      setBranch('Branch 1');
+      setStartTime('09:00');
+      setEndTime('18:00');
+      setNominalSalary('');
+      setActualSalary('');
+      setWorkingDays('');
+      setHourlyRate('');
+      setSelectedUser(null);
+    } catch (error) {
+      console.error('Error saving user:', error.message);
+    }
   }
+
 
   const handleEditUser = (user) => {
     setSelectedUser(user.id)
@@ -131,9 +135,9 @@ function UserManagement() {
     setHourlyRate(user.hourlyRate || '')
   }
 
-  const handleDeleteUser = async (id) => {
-    await deleteDoc(doc(db, 'users', id))
-    setUsers(users.filter((user) => user.id !== id))
+  const handleDeleteUser = async (user) => {
+    await deleteDoc(doc(db, 'branches', user.branch, 'users', user.id))
+    setUsers(users.filter((u) => u.id !== user.id))
   }
 
   return (
@@ -173,7 +177,7 @@ function UserManagement() {
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
-              {/* <option value="admin">Admin</option> */}
+              <option value="admin">Admin</option>
               <option value="hall">Hall</option>
               <option value="kitchen">Kitchen</option>
               <option value="part-time">Part-time</option>
@@ -287,7 +291,7 @@ function UserManagement() {
                   </button>
                   <button
                     className="btn btn-danger btn-sm"
-                    onClick={() => handleDeleteUser(user.id)}
+                    onClick={() => handleDeleteUser(user)}
                   >
                     Delete
                   </button>

@@ -14,8 +14,12 @@ function Auth() {
   }, [branch])
 
   const fetchUserNames = async (branch) => {
-    const names = await getAllDocuments(`branches/${branch}/users`, 'name') // Adjust path to include branch
+    // const names = await getAllDocuments(`branches/${branch}/users`, 'name') // Adjust path to include branch
+    // setUserNames(names)    
+    // console.log(names)
+    const names = await getAllDocuments('name') // 필드명만 전달
     setUserNames(names)
+    // console.log('User Names:', names)
   }
 
   const handleLogin = async () => {
