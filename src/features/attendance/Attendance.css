@@ -1,0 +1,22 @@
+/* src/Dashboard.css */
+.container {
+  max-width: 800px;
+}
+
+.table {
+  text-align: center;
+}
+
+th,
+td {
+  vertical-align: middle;
+}
+
+/* .table {
+  font-size: 90%;
+} */
+
+.table input[type='time'] {
+  /* font-size: 90%; */
+  padding: 2px 2px; /* Adjust as needed for desired padding */
+}

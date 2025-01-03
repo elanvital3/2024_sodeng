@@ -1,0 +1,17 @@
+/* src/Dashboard.css */
+.container {
+  max-width: 800px;
+}
+
+.table {
+  text-align: center;
+}
+
+th,
+td {
+  vertical-align: middle;
+}
+
+.table {
+  font-size: 80%;
+}
