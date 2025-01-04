@@ -86,8 +86,8 @@ function UserManagement() {
         // edit
         await updateUser(selectedUser, branch, userData)
         // setSelectedUser({ ...userData, id: selectedUser });
-        console.log(branch)
-        console.log(currentUser.branch)
+        // console.log(branch)
+        // console.log(currentUser.branch)
         if (currentUser.branch !== branch) {
           handleDeleteUser(currentUser)
         }
@@ -128,6 +128,15 @@ function UserManagement() {
     setUsers(users.filter((u) => u.id !== user.id))
     initInputs()
   }
+
+  // 브랜치별 사용자 분류
+  const branchUsers = users.reduce(
+    (acc, user) => {
+      acc[user.branch === 'Branch 1' ? 0 : 1].push(user);
+      return acc;
+    },
+    [[], []] // 첫 번째 배열은 Branch 1, 두 번째는 Branch 2
+  );
 
   return (
     <div className="container mt-5">
@@ -261,9 +270,66 @@ function UserManagement() {
 
           <hr />
 
-          <h4 className="text-center">User List</h4>
-          <ul className="list-group mt-3">
+          {/* <h4 className="text-center">User List</h4> */}
+          {/* <ul className="list-group mt-3">
             {users.map((user) => (
+              <li
+                key={user.id}
+                className="list-group-item d-flex justify-content-between align-items-center"
+              >
+                <span>
+                  {user.name} - {user.role} ({user.branch})
+                </span>
+                <div>
+                  <button
+                    className="btn btn-secondary btn-sm me-2"
+                    onClick={() => handleEditUser(user)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDeleteUser(user)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul> */}
+          <h4 className="text-center">Branch 1</h4>
+          <ul className="list-group mt-3">
+            {branchUsers[0].map((user) => (
+              <li
+                key={user.id}
+                className="list-group-item d-flex justify-content-between align-items-center"
+              >
+                <span>
+                  {user.name} - {user.role} ({user.branch})
+                </span>
+                <div>
+                  <button
+                    className="btn btn-secondary btn-sm me-2"
+                    onClick={() => handleEditUser(user)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDeleteUser(user)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <br />
+
+          <h4 className="text-center">Branch 2</h4>
+          <ul className="list-group mt-3">
+            {branchUsers[1].map((user) => (
               <li
                 key={user.id}
                 className="list-group-item d-flex justify-content-between align-items-center"

@@ -10,11 +10,11 @@ import Loader from '../../components/Loader'
 import './Roster.css'
 
 const getCurrentWeek = () => {
-  const date = new Date()
-  const firstDayOfYear = new Date(date.getFullYear(), 0, 1)
-  const pastDaysOfYear = (date - firstDayOfYear) / 86400000
-  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)
-}
+  const today = new Date();
+  const firstDayOfYear = new Date(today.getFullYear(), 0, 1);
+  const pastDaysOfYear = (today - firstDayOfYear) / 86400000;
+  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+};
 
 function Roster({ isAdmin }) {
   const [users, setUsers] = useState([])
@@ -67,14 +67,30 @@ function Roster({ isAdmin }) {
     fetchOnOffStatus()
   }, [users, year, week, selectedBranch])
 
+  // const getDatesInWeek = (year, week) => {
+  //   const firstDayOfYear = new Date(year, 0, 1)
+  //   const daysOffset = (week - 1) * 7 - firstDayOfYear.getDay()
+  //   return Array.from(
+  //     { length: 7 },
+  //     (_, i) => new Date(year, 0, daysOffset + i + 1)
+  //   ).filter((date) => date.getDay() !== 0)
+  // }
+
   const getDatesInWeek = (year, week) => {
-    const firstDayOfYear = new Date(year, 0, 1)
-    const daysOffset = (week - 1) * 7 - firstDayOfYear.getDay()
-    return Array.from(
-      { length: 7 },
-      (_, i) => new Date(year, 0, daysOffset + i + 1)
-    ).filter((date) => date.getDay() !== 0)
-  }
+    const firstDayOfYear = new Date(year, 0, 1);
+    const dayOffset = (week - 1) * 7 - firstDayOfYear.getDay() + 1;
+
+    // 기준 날짜로부터 시작
+    const startOfWeek = new Date(year, 0, dayOffset);
+
+    // 일요일 제외한 주중 날짜 생성
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      return date;
+    }).filter((date) => date.getDay() !== 0); // 일요일 제외
+  };
+
 
   const formatDate = (date) => {
     const month = String(date.getMonth() + 1).padStart(2, '0')

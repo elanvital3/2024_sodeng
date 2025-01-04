@@ -194,29 +194,111 @@ function Attendance() {
     }))
   }
 
+  // const handleSaveAll = async () => {
+  //   setIsLoading(true)
+  //   try {
+  //     let nominalTotal = 0
+  //     let actualTotal = 0
+
+  //     const saveWorkHoursPromises = Object.keys(workHoursByUser).map(
+  //       async (userId) => {
+  //         const user = users.find((u) => u.id === userId)
+  //         const { startTime, endTime, onOff, confirmed } =
+  //           workHoursByUser[userId]
+
+  //         let dailyWages = {}
+  //         if (confirmed) {
+  //           const start = new Date(`1970-01-01T${startTime}:00`)
+  //           const end = new Date(`1970-01-01T${endTime}:00`)
+  //           const actualWorkedHours = Math.max(
+  //             0,
+  //             (end - start) / (1000 * 60 * 60)
+  //           )
+  //           dailyWages = calculateDailyWages(user, actualWorkedHours)
+  //           nominalTotal += dailyWages.nominalDailyWage || 0
+  //           actualTotal += dailyWages.actualDailyWage || 0
+  //         }
+
+  //         const workHoursRef = doc(
+  //           db,
+  //           'branches',
+  //           selectedBranch,
+  //           'users',
+  //           userId,
+  //           'workHours',
+  //           selectedDate
+  //         )
+
+  //         return setDoc(
+  //           workHoursRef,
+  //           {
+  //             startTime,
+  //             endTime,
+  //             onOff,
+  //             confirmed,
+  //             ...dailyWages,
+  //           },
+  //           { merge: true }
+  //         )
+  //       }
+  //     )
+
+  //     const salesRef = doc(
+  //       db,
+  //       'branches',
+  //       selectedBranch,
+  //       'sales',
+  //       selectedDate
+  //     )
+  //     const saveSalesDataPromise = setDoc(
+  //       salesRef,
+  //       {
+  //         ...salesData,
+  //         nominalPayroll: nominalTotal.toFixed(2),
+  //         actualPayroll: actualTotal.toFixed(2),
+  //       },
+  //       { merge: true }
+  //     )
+
+  //     await Promise.all([...saveWorkHoursPromises, saveSalesDataPromise])
+  //   } catch (error) {
+  //     console.error('Error saving work hours and sales data:', error)
+  //     alert('Failed to save work hours and sales data')
+  //   } finally {
+  //     setIsLoading(false)
+  //   }
+  // }
   const handleSaveAll = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      let nominalTotal = 0
-      let actualTotal = 0
+      let nominalTotal = 0;
+      let actualTotal = 0;
 
       const saveWorkHoursPromises = Object.keys(workHoursByUser).map(
         async (userId) => {
-          const user = users.find((u) => u.id === userId)
+          const user = users.find((u) => u.id === userId);
           const { startTime, endTime, onOff, confirmed } =
-            workHoursByUser[userId]
+            workHoursByUser[userId] || {};
 
-          let dailyWages = {}
+          // undefined 필드에 기본값 설정
+          const workData = {
+            startTime: startTime || '00:00', // 기본값 설정
+            endTime: endTime || '00:00', // 기본값 설정
+            onOff: onOff || 'off', // 기본값 설정
+            confirmed: confirmed ?? false, // undefined 방지
+          };
+
+          let dailyWages = {};
           if (confirmed) {
-            const start = new Date(`1970-01-01T${startTime}:00`)
-            const end = new Date(`1970-01-01T${endTime}:00`)
+            const start = new Date(`1970-01-01T${workData.startTime}:00`);
+            const end = new Date(`1970-01-01T${workData.endTime}:00`);
             const actualWorkedHours = Math.max(
               0,
               (end - start) / (1000 * 60 * 60)
-            )
-            dailyWages = calculateDailyWages(user, actualWorkedHours)
-            nominalTotal += dailyWages.nominalDailyWage || 0
-            actualTotal += dailyWages.actualDailyWage || 0
+            );
+            dailyWages = calculateDailyWages(user, actualWorkedHours);
+            nominalTotal += dailyWages.nominalDailyWage || 0;
+            actualTotal += dailyWages.actualDailyWage || 0;
           }
 
           const workHoursRef = doc(
@@ -227,21 +309,18 @@ function Attendance() {
             userId,
             'workHours',
             selectedDate
-          )
+          );
 
           return setDoc(
             workHoursRef,
             {
-              startTime,
-              endTime,
-              onOff,
-              confirmed,
+              ...workData,
               ...dailyWages,
             },
             { merge: true }
-          )
+          );
         }
-      )
+      );
 
       const salesRef = doc(
         db,
@@ -249,7 +328,7 @@ function Attendance() {
         selectedBranch,
         'sales',
         selectedDate
-      )
+      );
       const saveSalesDataPromise = setDoc(
         salesRef,
         {
@@ -258,16 +337,16 @@ function Attendance() {
           actualPayroll: actualTotal.toFixed(2),
         },
         { merge: true }
-      )
+      );
 
-      await Promise.all([...saveWorkHoursPromises, saveSalesDataPromise])
+      await Promise.all([...saveWorkHoursPromises, saveSalesDataPromise]);
     } catch (error) {
-      console.error('Error saving work hours and sales data:', error)
-      alert('Failed to save work hours and sales data')
+      console.error('Error saving work hours and sales data:', error);
+      alert('Failed to save work hours and sales data');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isLoading) {
     return <Loader />

@@ -175,6 +175,7 @@ export const updateUser = async (selectedUser, branch, userData) => {
     // 정보가 없을때 : 브런치변경
     await signUpUser(branch, userData)
     console.log('User created successfully!');
+    alert('User created successfully!');
   }
 }
 
