@@ -8,8 +8,8 @@ import {
   updateDoc,
   deleteDoc,
 } from 'firebase/firestore'
-import { db, signUpUser, signUpAuth, updateUser, getAllDocuments } from '../../services/firebase'
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, signUpUser, signUpAuth, updateUser, getUsers } from '../../services/firebase'
+// import UserConfirmation from '../../components/UserConfirmation';
 
 function UserManagement() {
   const [users, setUsers] = useState([])
@@ -24,6 +24,7 @@ function UserManagement() {
   const [workingDays, setWorkingDays] = useState('')
   const [hourlyRate, setHourlyRate] = useState('')
   const [selectedUser, setSelectedUser] = useState(null)
+  const [currentUser, setCurrentUser] = useState(null)
 
   const calculateWorkHours = (start, end) => {
     const [startHours, startMinutes] = start.split(':').map(Number)
@@ -34,40 +35,30 @@ function UserManagement() {
     return workTime > 0 ? workTime : 24 + workTime // 음수일 경우 다음날까지 근무한 것으로 처리
   }
 
-  const branches = ['Branch 1', 'Branch 2'] // 브랜치 목록
-
   useEffect(() => {
     console.log('userEffect excuted')
     fetchUsers()
   }, [])
 
   const fetchUsers = async () => {
-    const allUsers = []
-    // const allUsers = getAllDocuments()
-    for (const branch of branches) {
-      const usersCollection = await getDocs(
-        collection(db, 'branches', branch, 'users')
-      )
-      const branchUsers = usersCollection.docs
-        .map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-          // branch: branch, // 각 유저에 브랜치 정보 추가
-        }))
-        .filter((user) => user.role !== 'admin') // Admin 제외
-      allUsers.push(...branchUsers)
-    }
-    // roleOrder에 따라 정렬
-    const sortedUsers = allUsers.sort(
-      (a, b) => (roleOrder[a.role] || 4) - (roleOrder[b.role] || 4)
-    )
-    setUsers(sortedUsers)
+    const userList = await getUsers(['Branch 1', 'Branch 2'])
+    setUsers(userList)
   }
 
-  const roleOrder = {
-    hall: 1,
-    kitchen: 2,
-    'part-time': 3,
+  const initInputs = () => {
+    // 상태 초기화
+    setName('');
+    setPassword('');
+    setRole('hall');
+    setBranch('Branch 1');
+    setStartTime('09:00');
+    setEndTime('18:00');
+    setNominalSalary('');
+    setActualSalary('');
+    setWorkingDays('');
+    setHourlyRate('');
+    setSelectedUser(null);
+    setCurrentUser(null);
   }
 
   const handleSaveUser = async () => {
@@ -76,7 +67,7 @@ function UserManagement() {
       name,
       password,
       role,
-      branch, // 지점 정보 추가
+      branch,
       startTime,
       endTime,
       workHours,
@@ -92,9 +83,17 @@ function UserManagement() {
 
     try {
       if (selectedUser) {
+        // edit
         await updateUser(selectedUser, branch, userData)
-        setSelectedUser({ ...userData, id: selectedUser });
+        // setSelectedUser({ ...userData, id: selectedUser });
+        console.log(branch)
+        console.log(currentUser.branch)
+        if (currentUser.branch !== branch) {
+          handleDeleteUser(currentUser)
+        }
+
       } else {
+        // 신규가입
         const email = name.toLowerCase() + '@fakeemail.com'; // 이메일 생성
         const newUser = await signUpAuth(email, password)
         await signUpUser(branch, userData, newUser.uid)
@@ -103,26 +102,15 @@ function UserManagement() {
 
       await fetchUsers();
 
-      // 상태 초기화
-      setName('');
-      setPassword('');
-      setRole('hall');
-      setBranch('Branch 1');
-      setStartTime('09:00');
-      setEndTime('18:00');
-      setNominalSalary('');
-      setActualSalary('');
-      setWorkingDays('');
-      setHourlyRate('');
-      setSelectedUser(null);
+      initInputs()
     } catch (error) {
       console.error('Error saving user:', error.message);
     }
   }
 
-
   const handleEditUser = (user) => {
     setSelectedUser(user.id)
+    setCurrentUser(user)
     setName(user.name)
     setPassword(user.password || '')
     setRole(user.role)
@@ -138,6 +126,7 @@ function UserManagement() {
   const handleDeleteUser = async (user) => {
     await deleteDoc(doc(db, 'branches', user.branch, 'users', user.id))
     setUsers(users.filter((u) => u.id !== user.id))
+    initInputs()
   }
 
   return (

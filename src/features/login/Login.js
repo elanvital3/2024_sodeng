@@ -13,7 +13,7 @@ function Auth() {
     }
   }, [branch])
 
-  const fetchUserNames = async (branch) => {
+  const fetchUserNames = async () => {
     // const names = await getAllDocuments(`branches/${branch}/users`, 'name') // Adjust path to include branch
     // setUserNames(names)    
     // console.log(names)

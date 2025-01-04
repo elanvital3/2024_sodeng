@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { db, getWorkHoursByDate } from '../../services/firebase'
+import { db, getWorkHoursByDate, getUsers } from '../../services/firebase'
 import { getDocs, collection, getDoc, doc, setDoc } from 'firebase/firestore'
 import './Attendance.css'
 import Loader from '../../components/Loader'
@@ -31,17 +31,12 @@ function Attendance() {
         setIsLoading(true)
         setWorkHoursByUser({})
 
-        const usersCollection = await getDocs(
-          collection(db, 'branches', selectedBranch, 'users')
-        )
-        const userList = usersCollection.docs
-          .map((doc) => ({
-            ...doc.data(),
-            id: doc.id,
-          }))
-          .filter((user) => user && user.role && user.role !== 'admin')
-          .sort((a, b) => (roleOrder[a.role] || 0) - (roleOrder[b.role] || 0))
-        setUsers(userList)
+        const fetchUsers = async () => {
+          const userList = await getUsers([selectedBranch])
+          setUsers(userList)
+        }
+
+        fetchUsers()
       } catch (error) {
         console.error('Error fetching user data:', error)
       } finally {
@@ -104,17 +99,17 @@ function Attendance() {
           const isOff = workData && workData.onOff === 'off'
           allWorkHours[user.id] = isOff
             ? {
-                startTime: '00:00',
-                endTime: '00:00',
-                onOff: 'off',
-                confirmed: true,
-              }
+              startTime: '00:00',
+              endTime: '00:00',
+              onOff: 'off',
+              confirmed: true,
+            }
             : workData || {
-                startTime: user.startTime || '09:00',
-                endTime: user.endTime || '18:00',
-                onOff: 'on',
-                confirmed: false,
-              }
+              startTime: user.startTime || '09:00',
+              endTime: user.endTime || '18:00',
+              onOff: 'on',
+              confirmed: false,
+            }
         })
       )
       setWorkHoursByUser(allWorkHours)

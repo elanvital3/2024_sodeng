@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { getDocs, collection, doc, setDoc } from 'firebase/firestore'
-import { db, getWorkHoursByDate } from '../../services/firebase'
+import { db, getWorkHoursByDate, getUsers } from '../../services/firebase'
 import {
   AiOutlineCaretLeft,
   AiOutlineCaretRight,
@@ -26,13 +26,7 @@ function Roster({ isAdmin }) {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const usersCollection = await getDocs(
-        collection(db, 'branches', selectedBranch, 'users')
-      )
-      const userList = usersCollection.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }))
+      const userList = await getUsers([selectedBranch])
       setUsers(userList)
     }
 
@@ -260,8 +254,8 @@ function Roster({ isAdmin }) {
                   dayOfWeek === 'SAT'
                     ? { color: 'blue' }
                     : dayOfWeek === 'SUN'
-                    ? { color: 'red' }
-                    : {}
+                      ? { color: 'red' }
+                      : {}
 
                 return (
                   <th key={idx} style={colorStyle}>
