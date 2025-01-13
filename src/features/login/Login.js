@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { loginUser, getAllDocuments } from '../../services/firebase'
+import { loginUser, getAllDocuments, getAllDocuments2 } from '../../services/firebase'
 
 function Auth() {
-  const [branch, setBranch] = useState('Branch 1') // Add branch selection state
+  const [branch, setBranch] = useState('TELOK') // Add branch selection state
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [userNames, setUserNames] = useState([])
@@ -14,10 +14,11 @@ function Auth() {
   }, [branch])
 
   const fetchUserNames = async () => {
+    const names = await getAllDocuments2(branch, 'users', 'name'); // 브랜치별 users 컬렉션에서 name 필드 가져오기
     // const names = await getAllDocuments(`branches/${branch}/users`, 'name') // Adjust path to include branch
     // setUserNames(names)    
     // console.log(names)
-    const names = await getAllDocuments('name') // 필드명만 전달
+    // const names = await getAllDocuments('name') // 필드명만 전달
     setUserNames(names)
     // console.log('User Names:', names)
   }
@@ -48,8 +49,8 @@ function Auth() {
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
               >
-                <option value="Branch 1">Branch 1</option>
-                <option value="Branch 2">Branch 2</option>
+                <option value="TELOK">TELOK</option>
+                <option value="AMOY">AMOY</option>
                 {/* <option value="Branch 3">Branch 3</option> */}
               </select>
             </div>

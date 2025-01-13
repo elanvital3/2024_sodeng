@@ -8,7 +8,7 @@ function FinancialPage() {
   const [selectedMonth, setSelectedMonth] = useState(
     new Date().toISOString().slice(0, 7)
   )
-  const [selectedBranch, setSelectedBranch] = useState('Branch 1') // Default branch
+  const [selectedBranch, setSelectedBranch] = useState('TELOK') // Default branch
 
   useEffect(() => {
     fetchSalesData(selectedMonth, selectedBranch)
@@ -87,8 +87,8 @@ function FinancialPage() {
             value={selectedBranch}
             onChange={(e) => setSelectedBranch(e.target.value)}
           >
-            <option value="Branch 1">Branch 1</option>
-            <option value="Branch 2">Branch 2</option>
+            <option value="TELOK">TELOK</option>
+            <option value="AMOY">AMOY</option>
             {/* <option value="Branch 3">Branch 3</option> */}
           </select>
         </div>
@@ -113,17 +113,17 @@ function FinancialPage() {
             <td>
               {monthlyNominalPayroll
                 ? `${monthlyNominalPayroll.toFixed(0)} $ (${(
-                    (monthlyNominalPayroll / monthlyTotalSales) *
-                    100
-                  ).toFixed(1)}%)`
+                  (monthlyNominalPayroll / monthlyTotalSales) *
+                  100
+                ).toFixed(1)}%)`
                 : '-'}
             </td>
             <td>
               {monthlyActualPayroll
                 ? `${monthlyActualPayroll.toFixed(0)} $ (${(
-                    (monthlyActualPayroll / monthlyTotalSales) *
-                    100
-                  ).toFixed(1)}%)`
+                  (monthlyActualPayroll / monthlyTotalSales) *
+                  100
+                ).toFixed(1)}%)`
                 : '-'}
             </td>
           </tr>
@@ -154,17 +154,17 @@ function FinancialPage() {
             const nominalPayroll = salesDataForDate?.nominalPayroll || 0
             const nominalPayrollDisplay = nominalPayroll
               ? `${Number(nominalPayroll).toFixed(0)} $ (${(
-                  (nominalPayroll / dailySales) *
-                  100
-                ).toFixed(1)}%)`
+                (nominalPayroll / dailySales) *
+                100
+              ).toFixed(1)}%)`
               : '-'
 
             const actualPayroll = salesDataForDate?.actualPayroll || 0
             const actualPayrollDisplay = actualPayroll
               ? `${Number(actualPayroll).toFixed(0)} $ (${(
-                  (actualPayroll / dailySales) *
-                  100
-                ).toFixed(1)}%)`
+                (actualPayroll / dailySales) *
+                100
+              ).toFixed(1)}%)`
               : '-'
 
             return (

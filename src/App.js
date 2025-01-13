@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import { onAuthStateChangedListener, auth, db } from './services/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import { onAuthStateChangedListener, auth, db, } from './services/firebase'
+import { doc, getDoc, query, where, collection, getDocs } from 'firebase/firestore'
 import Auth from './features/login/Login'
 import Attendance from './features/attendance/Attendance'
 import Roster from './features/roster/Roster'
@@ -15,21 +15,40 @@ import { signOut } from 'firebase/auth'
 function App() {
   const [user, setUser] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  // const [isAdmin, setIsAdmin] = useState(true)
 
   useEffect(() => {
     const fetchUserDataFromBranches = async (user) => {
-      const branchNames = ['Branch 1', 'Branch 2', 'Branch 3'] // 모든 branch 이름을 여기에 추가하세요
+      console.log(user.uid)
+      const branchNames = ['TELOK', 'AMOY'] // 모든 branch 이름을 여기에 추가하세요      
 
       for (const branch of branchNames) {
-        const userDocRef = doc(db, 'branches', branch, 'users', user.uid)
-        const userSnapshot = await getDoc(userDocRef)
-        if (userSnapshot.exists()) {
-          const userData = userSnapshot.data()
-          setIsAdmin(userData.role === 'admin') // role 확인 후 isAdmin 설정
-          return
+        const usersCollectionRef = collection(db, 'branches', branch, 'users'); // 브랜치의 사용자 컬렉션 참조
+        const q = query(usersCollectionRef, where('uid', '==', user.uid)); // uid 조건 쿼리
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const userData = querySnapshot.docs[0].data(); // 첫 번째 일치하는 문서 데이터
+          console.log(userData.role);
+          setIsAdmin(userData.role === 'admin'); // role 확인 후 isAdmin 설정
+          return; // 일치하는 사용자 찾으면 종료
         }
       }
 
+      // for (const branch of branchNames) {
+      //   const userDocRef = doc(db, 'branches', branch, 'users', user.uid)
+      //   const userSnapshot = await getDoc(userDocRef)
+      //   console.log(userSnapshot.exists())
+      //   if (userSnapshot.exists()) {
+      //     const userData = userSnapshot.data()
+      //     console.log(userData.role)
+      //     setIsAdmin(userData.role === 'admin') // role 확인 후 isAdmin 설정
+      //     // setIsAdmin(userData.role !== 'admin') // role 확인 후 isAdmin 설정
+      //     return
+      //   }
+      // }
+
+      // setIsAdmin(true) // 사용자 정보가 어떤 branch에서도 발견되지 않을 때
       setIsAdmin(false) // 사용자 정보가 어떤 branch에서도 발견되지 않을 때
     }
 
@@ -38,6 +57,7 @@ function App() {
       if (user) {
         await fetchUserDataFromBranches(user)
       } else {
+        // setIsAdmin(true)
         setIsAdmin(false)
       }
     })

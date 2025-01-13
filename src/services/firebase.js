@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { initializeApp } from 'firebase/app'
 import {
   getAuth,
@@ -49,7 +50,21 @@ export const db = getFirestore(app)
 
 
 // 필드에 따라 Firebase 컬렉션 데이터를 가져오는 함수 (모든 브랜치에서)
-const allBranche = ['Branch 1', 'Branch 2']
+const allBranche = ['TELOK', 'AMOY']
+
+export const getAllDocuments2 = async (branch, path, field = null) => {
+  const allData = [];
+
+  const collectionRef = collection(db, `branches/${branch}/${path}`);
+  const snapshot = await getDocs(collectionRef);
+
+  snapshot.docs.forEach((doc) => {
+    const data = doc.data();
+    allData.push(field ? data[field] : data); // 특정 필드만 가져오거나 전체 데이터를 가져옴
+  });
+
+  return allData;
+};
 
 export const getAllDocuments = async (field = null) => {
   const allData = []

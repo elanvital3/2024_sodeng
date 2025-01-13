@@ -1,6 +1,7 @@
+/* eslint-disable */
 import React, { useState, useEffect } from 'react'
 import { db, getWorkHoursByDate, getUsers } from '../../services/firebase'
-import { getDocs, collection, getDoc, doc, setDoc } from 'firebase/firestore'
+import { getDoc, doc, setDoc } from 'firebase/firestore'
 import './Attendance.css'
 import Loader from '../../components/Loader'
 
@@ -15,7 +16,7 @@ function Attendance() {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   )
-  const [selectedBranch, setSelectedBranch] = useState('Branch 1')
+  const [selectedBranch, setSelectedBranch] = useState('TELOK')
   const [workHoursByUser, setWorkHoursByUser] = useState({})
   const [isLoading, setIsLoading] = useState(true)
   const [salesData, setSalesData] = useState({
@@ -391,15 +392,15 @@ function Attendance() {
 
   return (
     <>
-      <div className="d-flex justify-content-between align-items-center mt-2">
+      <div className="d-flex justify-content-between align-items-center my-2">
         <div className="col-4">
           <select
             value={selectedBranch}
             onChange={(e) => setSelectedBranch(e.target.value)}
             className="form-control"
           >
-            <option value="Branch 1">Branch 1</option>
-            <option value="Branch 2">Branch 2</option>
+            <option value="TELOK">TELOK</option>
+            <option value="AMOY">AMOY</option>
           </select>
         </div>
         <div className="col-4 text-center">

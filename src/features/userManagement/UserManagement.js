@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import {
-  getDocs,
-  getDoc,
-  collection,
   doc,
-  setDoc,
-  updateDoc,
   deleteDoc,
 } from 'firebase/firestore'
 import { db, signUpUser, signUpAuth, updateUser, getUsers } from '../../services/firebase'
@@ -16,12 +11,12 @@ function UserManagement() {
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('hall')
-  const [branch, setBranch] = useState('Branch 1') // 지점 선택 상태 변수
+  const [branch, setBranch] = useState('AMOY') // 지점 선택 상태 변수
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('18:00')
   const [nominalSalary, setNominalSalary] = useState('')
   const [actualSalary, setActualSalary] = useState('')
-  const [workingDays, setWorkingDays] = useState('')
+  const [workingDays, setWorkingDays] = useState(5)
   const [hourlyRate, setHourlyRate] = useState('')
   const [selectedUser, setSelectedUser] = useState(null)
   const [currentUser, setCurrentUser] = useState(null)
@@ -41,7 +36,8 @@ function UserManagement() {
   }, [])
 
   const fetchUsers = async () => {
-    const userList = await getUsers(['Branch 1', 'Branch 2'])
+    const userList = await getUsers(['TELOK', 'AMOY'])
+    // const userList = await getUsers(['TELOK', 'AMOY'])
     setUsers(userList)
   }
 
@@ -50,7 +46,7 @@ function UserManagement() {
     setName('');
     setPassword('');
     setRole('hall');
-    setBranch('Branch 1');
+    setBranch('TELOK');
     setStartTime('09:00');
     setEndTime('18:00');
     setNominalSalary('');
@@ -114,7 +110,7 @@ function UserManagement() {
     setName(user.name)
     setPassword(user.password || '')
     setRole(user.role)
-    setBranch(user.branch || 'Branch 1') // 지점 정보 설정
+    setBranch(user.branch || 'TELOK') // 지점 정보 설정
     setStartTime(user.startTime)
     setEndTime(user.endTime)
     setNominalSalary(user.nominalSalary || '')
@@ -132,10 +128,10 @@ function UserManagement() {
   // 브랜치별 사용자 분류
   const branchUsers = users.reduce(
     (acc, user) => {
-      acc[user.branch === 'Branch 1' ? 0 : 1].push(user);
+      acc[user.branch === 'TELOK' ? 0 : 1].push(user);
       return acc;
     },
-    [[], []] // 첫 번째 배열은 Branch 1, 두 번째는 Branch 2
+    [[], []]
   );
 
   return (
@@ -175,7 +171,7 @@ function UserManagement() {
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
-              <option value="admin">Admin</option>
+              {/* <option value="admin">Admin</option> */}
               <option value="hall">Hall</option>
               <option value="kitchen">Kitchen</option>
               <option value="part-time">Part-time</option>
@@ -189,8 +185,8 @@ function UserManagement() {
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
             >
-              <option value="Branch 1">Branch 1</option>
-              <option value="Branch 2">Branch 2</option>
+              <option value="TELOK">TELOK</option>
+              <option value="AMOY">AMOY</option>
             </select>
           </div>
 
@@ -297,7 +293,7 @@ function UserManagement() {
               </li>
             ))}
           </ul> */}
-          <h4 className="text-center">Branch 1</h4>
+          <h4 className="text-center">TELOK</h4>
           <ul className="list-group mt-3">
             {branchUsers[0].map((user) => (
               <li
@@ -327,7 +323,7 @@ function UserManagement() {
 
           <br />
 
-          <h4 className="text-center">Branch 2</h4>
+          <h4 className="text-center">AMOY</h4>
           <ul className="list-group mt-3">
             {branchUsers[1].map((user) => (
               <li

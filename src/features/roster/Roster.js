@@ -1,5 +1,6 @@
+/* eslint-disable */
 import React, { useState, useEffect, useMemo } from 'react'
-import { getDocs, collection, doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
 import { db, getWorkHoursByDate, getUsers } from '../../services/firebase'
 import {
   AiOutlineCaretLeft,
@@ -18,7 +19,7 @@ const getCurrentWeek = () => {
 
 function Roster({ isAdmin }) {
   const [users, setUsers] = useState([])
-  const [selectedBranch, setSelectedBranch] = useState('Branch 1')
+  const [selectedBranch, setSelectedBranch] = useState('TELOK')
   const [year, setYear] = useState(new Date().getFullYear())
   const [week, setWeek] = useState(getCurrentWeek())
   const [onOffStatus, setOnOffStatus] = useState({})
@@ -206,8 +207,8 @@ function Roster({ isAdmin }) {
               className="form-control"
               style={{ width: 'auto' }}
             >
-              <option value="Branch 1">Branch 1</option>
-              <option value="Branch 2">Branch 2</option>
+              <option value="TELOK">TELOK</option>
+              <option value="AMOY">AMOY</option>
             </select>
           </div>
           <div className="col-6">
